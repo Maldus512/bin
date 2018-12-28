@@ -1,0 +1,78 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+export MALID=$$
+
+[[ -f ~/.bash_aliases ]] && . ~/.bash_aliases
+
+alias ls='ls --color=auto'
+
+BOLD="\[$(tput bold)\]"
+RESET="\[$(tput sgr0)\]"
+BLUE="\[$(tput setaf 4)\]"
+CYAN="\[$(tput setaf 6)\]"
+MAG="\[$(tput setaf 5)\]"
+#PS1='[\u@\h \W]\$ '
+export PS1="${BOLD}[\u@$MALID ${BOLD}${BLUE}\W${RESET}${BOLD}]\$${RESET} "
+
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ]; then
+  PATH="$HOME/bin:$PATH"
+fi
+
+if [ -d "$HOME/.node_modules" ]; then
+    PATH="$HOME/.node_modules/bin:$PATH"
+fi
+
+export npm_config_prefix=~/.node_modules
+
+export GOPATH="$HOME/Projects/go"
+export PATH="$PATH:$GOPATH/bin"
+export CLASSPATH=".:/usr/share/java/antlr-4.6-complete.jar:/opt/apache-spark/jars/*:$CLASSPATH"
+export JAVA_HOME="/usr/lib/jvm/java-8-openjdk/"
+export ANTLR="antlr4"
+export GRUN="grun"
+export HISTCONTROL="ignoreboth"
+export HISTSIZE=-1
+
+# Espressif path
+export IDF_PATH="/home/maldus/Source/Github/esp-idf"
+export PATH="$PATH:/opt/espressif/xtensa-esp32-elf/bin"
+export PATH="$PATH:/opt/espressif/openocd-esp32/bin"
+
+#Spark path
+#export PATH="$PATH:/opt/apache-spark/bin"
+export PATH="$PATH:/opt/flutter/bin"
+export ANDROID_HOME="/opt/Android"
+
+export PATH="$PATH:/opt/easyeda"
+
+export WINEPREFIX="/home/maldus/Mount/Data/Wine"
+
+bin2hex() {
+   echo "obase=16;ibase=2;$1"|bc
+}
+hex2bin() {
+    echo "ibase=16;obase=2;$1" | bc
+}
+
+
+export LD_LIBRARY_PATH="/opt/cuda/lib64"
+
+if command -v tmux>/dev/null; then
+  [[ ! $TERM =~ linux ]] && [[ ! $TERM =~ screen ]] && [ "$MALDUS_BACKGROUND" = true ] && [ -z $TMUX ] && exec tmux -u -2 new-session -t main \; set-option destroy-unattached \; send-keys -t "main:0" C-z ' export IGNOREEOF=42' Enter 'clear' Enter
+#[[ ! $TERM =~ linux ]] && [[ ! $TERM =~ screen ]] && [ -z "$VSCODE" ] && [ -z $TMUX ] && exec tmux -u -2 new-session -t main \; new-window \; set-option destroy-unattached
+fi
+
+set_tmux_title() {
+    string=`history 1 | sed -e 's/^[0-9]* *//g'`
+    [[ $TERM =~ screen ]] && tmux rename-window -t${TMUX_PANE} "$string"
+}
+
+HISTIGNORE='ecryptfs*'
+#PROMPT_COMMAND='sleep 3'
