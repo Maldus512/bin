@@ -301,8 +301,9 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
-
-    awful.key({ modkeyAlt, modkeyCtrl }, "l" ,function() awful.spawn("/home/maldus/bin/launcher.py") end),
+    awful.key({ modkeyAlt, modkeyCtrl }, "n" ,function() awful.spawn("/home/maldus/bin/change_wallpaper") end),
+    awful.key({ modkeyAlt, modkeyCtrl }, "l" ,function() awful.spawn("rofi -show run -theme purple") end),
+    awful.key({ modkeyAlt, modkeyCtrl }, "p" ,function() awful.spawn("konsole -e /home/maldus/bin/myprop.sh") end),
     awful.key({ modkeyAlt, modkeyCtrl}, "Up",    function () grid("up") end),
     awful.key({ modkeyAlt,modkeyCtrl}, "Down",   function () grid("down") end),
     awful.key({ modkeyAlt, modkeyCtrl  }, "Left",   function () grid("left") end),
@@ -465,31 +466,68 @@ root.keys(globalkeys)
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
+     {
+        rule_any = 
+        { 
+            { 
+                class = {"sun-awt-X11-XWindowPeer", "MPLAB X IDE v5.05"}
+            }
+        
+        },
+        properties = { titlebars_enabled = false, placement=awful.placement.next_to_mouse },
+        callback = function(c)
+            print("trovato mplab window")
+        end
+    },
     -- All clients will match this rule.
     { rule = { },
+      --except_any = { { class = {"sun-awt-X11-XWindowPeer"},} },
       properties = { border_width = beautiful.border_width,
                      border_color = beautiful.border_normal,
                      focus = awful.client.focus.filter,
                      raise = true,
                      keys = clientkeys,
+                     titlebars_enabled = false,
                      buttons = clientbuttons,
                      screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen,
-                     --floating = true,
+                     placement = awful.placement.centered,
+                     floating = true,
+
+        callback = function(c)
+            if (c.class ~= nil and string.find(c.class, "MPLAB") and string.find(c.type, "dialog")) then
+                local f = awful.placement.top_left
+                local g = c:geometry()
+                if (c.size_hints == nil or c.size_hints.program_position == nil) then
+                    return
+                end
+                g.x = c.size_hints.program_position.x
+                g.y = c.size_hints.program_position.y
+                g.width = 0
+                g.height = 0
+                f(c, {offset = g})
+            end
+        end
      }
     },
     -- konsole
     {
         rule_any = {
-            name = { "launcher"},
+            class = { "konsole", "Konsole"},
         },
-        properties = {floating = true, placement = awful.placement.centered},
+        properties = {placement = --awful.placement.no_offscreen+
+            awful.placement.no_overlap},
     },
     {
         rule_any = {
              class = { "panel", "lxpanel" },
         },
-        properties = {border_width = 0},
+        properties = {border_width = 0, sticky = true, focusable=false},
+    },
+    {
+        rule_any = {
+             class = { "conky", "Conky" },
+        },
+        properties = { sticky = true, focusable=false},
     },
     {
         rule_any = {
@@ -497,16 +535,6 @@ awful.rules.rules = {
             name = {"tilda"},
         },
         properties = {maximized_vertical = true, maximized_horizontal = true},
-    },
-
-    -- bbpager
-    {
-        rule_any = {
-            instance = { "bbpager", "bbtools", },
-            class = { "bbpager", "bbtools", },
-            name = { "bbpager", "bbtools", },
-        },
-        properties = {floating = true, skip_taskbar=true, dockable=true, sticky=true, x= 1920-170, y = 1024-200},
     },
     -- Floating clients.
     { rule_any = {
@@ -532,15 +560,23 @@ awful.rules.rules = {
           "AlarmWindow",  -- Thunderbird's calendar.
           "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
         }
-      }, properties = { floating = true }},
+      },
+    except_any = { { class = {"sun-awt-X11-XWindowPeer"},} },
+    properties = { floating = true }},
 
     -- Add titlebars to normal clients and dialogs
-    { rule_any = {type = { "normal", "dialog" },
-        role = {"AlarmWindow","pop-up"}
-      }, properties = { titlebars_enabled = false, placement=awful.placement.center, }
+    { rule_any = {
+        --type = {"dialog" },
+        role = {"AlarmWindow","pop-up"},
+        class = {"Dialog"}
+      }, 
+    
+    except_any = { { class = {"sun-awt-X11-XWindowPeer"}, },},
+
+    properties = { titlebars_enabled = true, placement=awful.placement.centered, }
     },
 
-    -- Set Firefox to always map on the tag named "2" on screen 1.
+       -- Set Firefox to always map on the tag named "2" on screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { screen = 1, tag = "2" } },
 }
