@@ -12,7 +12,7 @@ local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 local switcher = require("awesome-switcher")
 local common = require("awful.widget.common")
-local tolerance = 5 
+local tolerance = 20
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 
@@ -91,6 +91,7 @@ function verticalSnap(c, direction)
         else
             g.height = -wh/2
         end
+        if c.maximized_vertical then c.maximized_vertical = false end
         g.y = ypos[direction]
         g.width = 0
         local f = awful.placement.top_left
@@ -112,6 +113,7 @@ function horizontalSnap(c, direction)
     local w = c.width
     local g = deltageometry(c)
     local ww = c.screen.workarea.width
+    local deltay = c.screen.geometry.height - c.screen.workarea.height
     local xpos = {
         ["right"] = ww/2,
         ["left"] = 0,
@@ -122,9 +124,15 @@ function horizontalSnap(c, direction)
     }
     -- If it's already horizontally maximized just move it to the right
     if (w > ww-tolerance and w < ww+tolerance)
-        or c.maximized_horizontal then
-        g.x = xpos[direction]
+        or c.maximized_horizontal or c.maximized then
+        if c.maximized then 
+            c.maximized = false 
+        end
         g.width = -ww/2
+        if c.maximized_horizontal then c.maximized_horizontal = false end
+        g.x = xpos[direction]
+        g.y = g.y - deltay
+        if g.y < 0 then g.y = 0 end
         g.height = 0
         local f = awful.placement.top_left
         f(client.focus, {honor_workarea=true, offset=g})
