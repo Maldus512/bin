@@ -38,7 +38,7 @@ set splitbelow
 "" Colors
 colorscheme apprentice
 highlight OverLength ctermbg=gray ctermfg=black guibg=#FFD9D9
-match OverLength /\%81v.\+/
+match OverLength /\%121v.\+/
 highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
 
 "" Minpac
@@ -52,6 +52,8 @@ call minpac#add('Asheq/close-buffers.vim')
 call minpac#add('preservim/nerdtree')
 call minpac#add('romainl/Apprentice')
 call minpac#add('rhysd/vim-clang-format')
+call minpac#add('tpope/vim-fugitive')
+call minpac#add('ycm-core/YouCompleteMe')
 
 "" Custom shortcuts
 " open files with fzf and open buffers
